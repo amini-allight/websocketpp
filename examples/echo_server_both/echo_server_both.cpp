@@ -58,14 +58,14 @@ context_ptr on_tls_init(websocketpp::connection_hdl hdl) {
 }
 
 int main() {
-    // set up an external io_service to run both endpoints on. This is not
+    // set up an external io_context to run both endpoints on. This is not
     // strictly necessary, but simplifies thread management a bit.
-    boost::asio::io_service ios;
+    boost::asio::io_context ioc;
 
     // set up plain endpoint
     server_plain endpoint_plain;
-    // initialize asio with our external io_service rather than an internal one
-    endpoint_plain.init_asio(&ios);
+    // initialize asio with our external io_context rather than an internal one
+    endpoint_plain.init_asio(&ioc);
     endpoint_plain.set_message_handler(
         bind(&on_message<server_plain>,&endpoint_plain,::_1,::_2));
     endpoint_plain.listen(80);
@@ -73,7 +73,7 @@ int main() {
 
     // set up tls endpoint
     server_tls endpoint_tls;
-    endpoint_tls.init_asio(&ios);
+    endpoint_tls.init_asio(&ioc);
     endpoint_tls.set_message_handler(
         bind(&on_message<server_tls>,&endpoint_tls,::_1,::_2));
     // TLS endpoint has an extra handler for the tls init
@@ -82,6 +82,6 @@ int main() {
     endpoint_tls.listen(443);
     endpoint_tls.start_accept();
 
-    // Start the ASIO io_service run loop running both endpoints
-    ios.run();
+    // Start the ASIO io_context run loop running both endpoints
+    ioc.run();
 }
